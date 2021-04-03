@@ -3,6 +3,7 @@ use std::io::{
     Error,
     ErrorKind,
 };
+use std::time::Duration;
 use std::boxed::Box;
 use rppal::{
     uart::{
@@ -54,7 +55,12 @@ impl Maestro {
                 self.read_buf = Some(Box::new([0u8; BUFFER_SIZE]));
                 self.write_buf = Some(Box::new([0u8; BUFFER_SIZE]));
 
-                let buf = self.write_buf.as_mut().unwrap().as_mut();
+                self.uart.as_mut().unwrap().as_mut().set_read_mode(2u8, Duration::from_secs(10u64));
+
+                let buf = self.write_buf
+                    .as_mut()
+                    .unwrap()
+                    .as_mut();
 
                 buf[0usize] = ProtocolMetadata::SYNC as u8;
                 buf[1usize] = ProtocolMetadata::DEVICE_NUMBER as u8;
@@ -76,16 +82,19 @@ impl Maestro {
     }
 
     fn read(self: &mut Self, length: usize) -> Result<usize, Error> {
-        if (length <= 2usize) || (BUFFER_SIZE < length) {
+        if BUFFER_SIZE < length {
             panic!();
         }
         
         let slice = &mut self.read_buf
             .as_mut()
             .unwrap()
-            .as_mut()[0usize..(length - 1usize)];
+            .as_mut()[0usize..length];
 
-        return self.uart.as_mut().unwrap().read(slice)
+        return self.uart
+            .as_mut()
+            .unwrap()
+            .read(slice)
             .map(|bytes_written| bytes_written)
             .map_err(|rppal_err| Maestro::deconstruct_error(rppal_err));
     }
@@ -98,9 +107,12 @@ impl Maestro {
         let slice = &self.write_buf
             .as_mut()
             .unwrap()
-            .as_mut()[0usize..(length - 1usize)];
+            .as_mut()[0usize..length];
 
-        return self.uart.as_mut().unwrap().write(slice)
+        return self.uart
+            .as_mut()
+            .unwrap()
+            .write(slice)
             .map(|bytes_written| bytes_written)
             .map_err(|rppal_err| Maestro::deconstruct_error(rppal_err));
     }
