@@ -14,7 +14,7 @@ use std::thread::sleep;
 mod test_util;
 use crate::test_util::test_util::within_tolerance;
 
-const TIMEOUT:u32 = 2000;
+const TIMEOUT:u32 = 10000;
 
 
 fn wait(maestro: & mut Maestro, target:u16) -> () {
@@ -23,6 +23,7 @@ fn wait(maestro: & mut Maestro, target:u16) -> () {
     { 
         if timeout_counter > TIMEOUT
         {
+            println!("Position: {:?}\n", maestro.get_position(Channels::C_0).unwrap());
             panic!("took too long! \n");
         }
         thread::sleep(Duration::from_millis(100)); 
@@ -48,21 +49,21 @@ fn main() -> () {
         thread::sleep(Duration::from_millis(sleep_time));
 
         maestro.set_target(Channels::C_0, big).unwrap();
-        wait(& mut maestro, big);
+        // wait(& mut maestro, big);
 
         thread::sleep(Duration::from_millis(sleep_time));
 
         //accel test
         maestro.set_target(Channels::C_0, small).unwrap();
-        maestro.set_acceleration(Channels::C_0, accel).unwrap();
-        wait(&mut maestro, small);
-        let d:u16 = big - small;
-        let expected_time: f64 = ((2 as f64)*(d as f64)/(accel as f64)).sqrt();
-        let now = Instant::now();
+        // maestro.set_acceleration(Channels::C_0, accel).unwrap();
+        // wait(&mut maestro, small);
+        // let d:u16 = big - small;
+        // let expected_time: f64 = ((2 as f64)*(d as f64)/(accel as f64)).sqrt();
+        // let now = Instant::now();
 
-        maestro.set_target(Channels::C_0, big).unwrap();
-        wait(& mut maestro, big);
-        assert!( within_tolerance(now.elapsed().as_millis() as u16, expected_time as u16, 100));
+        // maestro.set_target(Channels::C_0, big).unwrap();
+        // wait(& mut maestro, big);
+        // assert!( within_tolerance(now.elapsed().as_millis() as u16, expected_time as u16, 100));
 
     }
 }
