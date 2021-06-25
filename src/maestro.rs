@@ -411,20 +411,29 @@ impl Maestro {
         self.read_after_writing(write_result).map(Errors::from_data)
     }
 
+    /// Returns 1 as long as there is at least one servo still moving
+    /// # Important
+    /// "The Get Moving State command only works on the Mini Maestros. 
+    /// The Micro Maestro 6-channel controller implements the command, 
+    /// but it has a bug that could make this command return 0 when it 
+    /// should return 1." From the Pololu Docs
     pub fn get_moving_state(&mut self) -> Result<u16> {
         let write_result = self.write_command(CommandFlags::GET_MOVING_STATE);
 
         self.read_after_writing(write_result)
     }
 
+    /// Starts the script at location given by subroutine_num. 
     pub fn restart_script_at_subroutine(&mut self, subroutine_num: u8) -> Result<()> {
         self.write_payload(CommandFlags::RESTART_SCRIPT_AT_SUBROUTINE, subroutine_num)
     }
 
+    /// Same as restart_script_at_subroutine but places param on stack beforehand.
     pub fn restart_script_at_subroutine_with_parameter(&mut self, subroutine_num: u8, script_param: u16) -> Result<()> {
         self.write_payload_and_param(CommandFlags::RESTART_SCRIPT_AT_SUBROUTINE_WITH_PARAMETER, subroutine_num, script_param)
     }
 
+    /// Returns 1 if script running, 0 if not.
     pub fn get_script_status(&mut self) -> Result<u16> {
         let write_result = self.write_command(CommandFlags::GET_SCRIPT_STATUS);
 

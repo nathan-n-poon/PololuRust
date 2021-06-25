@@ -55,14 +55,8 @@ pub(crate) enum CommandFlags {
     GO_HOME = 0xA2u8,
     STOP_SCRIPT = 0xA4u8,
     GET_MOVING_STATE = 0x93u8,
-
-    #[allow(unused)]
     RESTART_SCRIPT_AT_SUBROUTINE = 0xA7u8,
-
-    #[allow(unused)]
     RESTART_SCRIPT_AT_SUBROUTINE_WITH_PARAMETER = 0xA8u8,
-
-    #[allow(unused)]
     GET_SCRIPT_STATUS = 0xAEu8,
 }
 
