@@ -410,6 +410,27 @@ impl Maestro {
 
         self.read_after_writing(write_result).map(Errors::from_data)
     }
+
+    pub fn get_moving_state(&mut self) -> Result<u16> {
+        let write_result = self.write_command(CommandFlags::GET_MOVING_STATE);
+
+        self.read_after_writing(write_result)
+    }
+
+    pub fn restart_script_at_subroutine(&mut self, subroutine_num: u8) -> Result<()> {
+        self.write_payload(CommandFlags::RESTART_SCRIPT_AT_SUBROUTINE, subroutine_num)
+    }
+
+    pub fn restart_script_at_subroutine_with_parameter(&mut self, subroutine_num: u8, script_param: u16) -> Result<()> {
+        self.write_payload_and_param(CommandFlags::RESTART_SCRIPT_AT_SUBROUTINE_WITH_PARAMETER, subroutine_num, script_param)
+    }
+
+    pub fn get_script_status(&mut self) -> Result<u16> {
+        let write_result = self.write_command(CommandFlags::GET_SCRIPT_STATUS);
+
+        self.read_after_writing(write_result)
+    }
+
 }
 
 /// Private utility methods
@@ -553,6 +574,46 @@ impl Maestro {
         buffer[3usize] = channel as u8;
         buffer[4usize] = lower;
         buffer[5usize] = upper;
+
+        self.write(length_to_write)
+    }
+
+    #[inline]
+    fn write_payload_and_param(
+        &mut self,
+        command_flag: CommandFlags,
+        payload: u8,
+        microsec: u16,
+    ) -> Result<()> {
+        let length_to_write = 6usize;
+
+        let command = mask_byte(command_flag as u8);
+        let (lower, upper) = microsec_to_target(microsec);
+
+        let buffer = self.write_buf.as_mut().unwrap().as_mut();
+
+        buffer[2usize] = command;
+        buffer[3usize] = payload;
+        buffer[4usize] = lower;
+        buffer[5usize] = upper;
+
+        self.write(length_to_write)
+    }
+
+    #[inline]
+    fn write_payload(
+        &mut self,
+        command_flag: CommandFlags,
+        microsec: u8,
+    ) -> Result<()> {
+        let length_to_write = 4usize;
+
+        let command = mask_byte(command_flag as u8);
+
+        let buffer = self.write_buf.as_mut().unwrap().as_mut();
+
+        buffer[2usize] = command;
+        buffer[3usize] = microsec;
 
         self.write(length_to_write)
     }
